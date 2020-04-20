@@ -47,47 +47,65 @@ traversal_path = []
 
 
 
-# traversal_stack = []
-# visited = []
+def get_possible_directions(current_room, visited_rooms):
+    # creates empty list of valid exits
+    valid_exits = []
+    # Creates list with all exits
+    for exit in current_room.get_exits():
+        # if the current room has not been visited
+        if room_graph[current_room.id][1][exit] not in visited_rooms:
+            # mark as visited and add the exit
+            valid_exits.append(exit)
+    #return the updated valid exits
+    return valid_exits
 
-# directions = ['n', 's', 'e', 'w']
+# Fill this out with directions to walk
+def find_rooms():
+    # variables:
 
-# current_room = world.rooms[0]
+    # creates empty set of visted rooms
+    visited_rooms = set()
+    # Put the starting point in that, amd marks the player's current room as visited
+    # adds the player's current room to the set of visited rooms
+    visited_rooms.add(player.current_room.id)
+    # empty list to reverse the path out of the room
+    backward_path = []
 
-reverse_dir = {'n': 's', 's': 'n','w': 'e','e': 'w'}
+    # while loops the length of the visted rooms is less than 500
+    while len(visited_rooms) < len(room_graph.keys()):
+        #sets the player in the current room
+        current_room = player.current_room.id
+        # traverse through to get valid exits
+        valid_exits = get_possible_directions(player.current_room, visited_rooms)
 
+        # if there are no valid exits go backwards
+        if len(valid_exits) == 0: 
+            # removes the last path used
+            exit_direction = backward_path.pop()
+            player.travel(exit_direction)
+            # adds the exit_direction/path 
+            traversal_path.append(exit_direction) # this is a path
+            continue # continue the while loop
 
-def get_possible_traversed_path(starting_room, visited=set()):
-    
-    path = []
+        # if the room hasn't been visited
+        for exit_direction in valid_exits:
+            # add the current room to visited
+            visited_rooms.add(room_graph[current_room][1][exit_direction])
+            # adds the exit_direction/path 
+            traversal_path.append(exit_direction)  # this is a path
 
-    # get all possible exits in current_room
-    for direction in player.current_room.get_exits():
-        # player travel to room in direction of exit
-        player.travel(direction)
-
-        # check if new room has been visited, if not
-        if player.current_room.id not in visited:
-            # mark room id as visited
-            visited.add(player.current_room.id)
-            # add new direction to path
-            path.append(direction)
-            recurse = get_possible_traversed_path(player.current_room.id, visited)
-            # recurse with new current_room and add to path
-            path = path + recurse 
-            # backtrack and go to different room
-            player.travel(reverse_dir[direction])
-            # add backtrack to path to keep track of steps 
-            path.append(reverse_dir[direction])
-
-        else:
-            # Room already visited so backtrack and go to different room
-            player.travel(reverse_dir[direction])
-
-    return path
-
-traversal_path = get_possible_traversed_path(player.current_room.id)
-
+            # the backwards path back out
+            if exit_direction == "n":
+                backward_path.append("s")
+            elif exit_direction == "s":
+                backward_path.append("n")
+            elif exit_direction == "w":
+                backward_path.append("e")
+            else:
+                backward_path.append("w")
+            player.travel(exit_direction)
+            break
+find_rooms()
 
 
 
